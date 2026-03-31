@@ -3,6 +3,26 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef _WIN32
+#include <conio.h>
+#define getch _getch
+#else
+#include <termios.h>
+#include <unistd.h>
+int getch()
+{
+    struct termios oldt, newt;
+    int ch;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return ch;
+}
+#endif
+
 char start_screen(char);
 void create_random(int[4][4]);
 void print_board(int *, int *, int[4][4]);
